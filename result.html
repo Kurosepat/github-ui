@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>チェック結果</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Helvetica Neue', sans-serif;
+      background: linear-gradient(to right, #f8f8f8, #dcdcdc);
+      color: #111;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 30px;
+    }
+    #result-box {
+      background-color: rgba(0,0,0,0.05);
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: left;
+      font-size: 1.1em;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+    .dots::after {
+      content: '';
+      display: inline-block;
+      animation: dots 2s steps(20, end) infinite;
+      white-space: nowrap;
+      overflow: hidden;
+      vertical-align: bottom;
+    }
+    @keyframes dots {
+      0%   { content: ''; }
+      5%   { content: '.'; }
+      10%  { content: '..'; }
+      15%  { content: '...'; }
+      20%  { content: '....'; }
+      25%  { content: '.....'; }
+      30%  { content: '......'; }
+      35%  { content: '.......'; }
+      40%  { content: '........'; }
+      45%  { content: '.........'; }
+      50%  { content: '..........'; }
+      55%  { content: '...........'; }
+      60%  { content: '............'; }
+      65%  { content: '.............'; }
+      70%  { content: '..............'; }
+      75%  { content: '...............'; }
+      80%  { content: '................'; }
+      85%  { content: '.................'; }
+      90%  { content: '..................'; }
+      95%  { content: '...................'; }
+      100% { content: '....................'; }
+    }
+  </style>
+</head>
+<body>
+  <h1>チェック結果</h1>
+  <div id="result-box">
+    <div id="loading">
+      暫くお待ちください。現在、AI分析中です<span class="dots"></span>
+    </div>
+    <div id="final-result" style="display: none;">
+      チェックが完了しました。詳細は以下のとおりです：<br><br>
+      <span id="result-text"></span>
+    </div>
+  </div>
+
+  <script>
+  const params = new URLSearchParams(window.location.search);
+  const result = params.get("result");
+
+  if (result) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("final-result").style.display = "block";
+    document.getElementById("result-text").textContent = decodeURIComponent(result);
+  }
+</script>
+
+</body>
+</html>

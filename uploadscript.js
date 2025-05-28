@@ -1,5 +1,3 @@
-// ✅ uploadscript.js（再選択できない・cloneなし・動作安定）
-
 window.addEventListener('DOMContentLoaded', function () {
   document.getElementById("today-date").value = new Date().toISOString().split('T')[0];
 
@@ -50,12 +48,13 @@ window.addEventListener('DOMContentLoaded', function () {
       const resultText = await response.text();
       clearInterval(interval);
 
-      if (response.ok) {
-        const cleanScript = resultText.replace(/<script>|<\/script>/g, "");
-        eval(cleanScript);
+      const recordId = resultText.trim();
+      if (response.ok && recordId.startsWith('rec')) {
+        window.location.href = `result.html?id=${recordId}`;
       } else {
-        alert('❌ エラーが発生しました（Make側）:\n' + resultText);
+        alert('❌ 予期しないレスポンスです:\n' + resultText);
       }
+
     } catch (error) {
       clearInterval(interval);
       console.error('通信エラー:', error);

@@ -40,7 +40,8 @@ window.addEventListener('DOMContentLoaded', function () {
     formData.append('date', date);
 
     try {
-      const response = await fetch('https://hook.us2.make.com/2oi6xu9uwoep5xbj7y8ir4qq4c6jvctf', {
+      // 👇 ここを Make Webhook から Relay Server に変更！
+      const response = await fetch('https://patent-ai-relay-server-v10.onrender.com/api/upload', {
         method: 'POST',
         body: formData
       });
@@ -82,13 +83,11 @@ function setupDropZone(zoneId, inputId, nameId, removeId, displayId) {
     }
   }
 
-  // ✅ 再選択を防止：ファイルが既にあるならclickをブロック
   zone.addEventListener('click', () => {
     if (input.files.length > 0) return;
     input.click();
   });
 
-  // ✅ ドロップも1回限り（ファイルがなければ受け付ける）
   zone.addEventListener('dragover', (e) => {
     e.preventDefault();
     zone.style.backgroundColor = '#444';

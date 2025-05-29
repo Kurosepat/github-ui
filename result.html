@@ -55,7 +55,7 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const recordId = params.get("id");
+    const recordId = params.get("recordId");
 
     if (!recordId) {
       document.getElementById("loading").innerText = "❌ レコードIDが指定されていません。";

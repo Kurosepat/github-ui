@@ -43,7 +43,7 @@ window.addEventListener('DOMContentLoaded', function () {
       // 👇 ここを Make Webhook から Relay Server に変更！
       const response = await fetch('https://relay-server-v10.onrender.com/api/upload', {
         method: 'POST',
-        body: formData
+        body: formData,
         headers: {
     // 追加：CORS対策の明示的な対話用ヘッダー
     'Accept': 'application/json'

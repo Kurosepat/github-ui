@@ -55,17 +55,25 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const recordId = params.get("recordId");
+    const recordId = params.get("id");
 
     if (!recordId) {
       document.getElementById("loading").innerText = "❌ レコードIDが指定されていません。";
     } else {
-      fetch(`https://relay-server-v10.onrender.com/api/get-result?id=${recordId}`)
+      fetch(`https://relay-server-v6.onrender.com/api/get-result?id=${recordId}`)
         .then(res => res.text())
         .then(text => {
           document.getElementById("loading").style.display = "none";
           document.getElementById("final-result").style.display = "block";
-          document.getElementById("result-text").innerText = text;
+
+          // 結果を「重要度:」ごとに分割して空行を入れる
+          const formatted = text
+            .split(/(?=重要度:)/g)
+            .map(block => block.trim())
+            .filter(Boolean)
+            .join("\n\n");
+
+          document.getElementById("result-text").innerText = formatted;
         })
         .catch(err => {
           console.error("通信エラー:", err);

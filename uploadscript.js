@@ -44,18 +44,17 @@ window.addEventListener('DOMContentLoaded', function () {
         method: 'POST',
         body: formData,
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'text/plain'
         }
       });
 
-      const resultJson = await response.json();
+      const recordId = await response.text();
       clearInterval(interval);
 
-      const recordId = resultJson.recordId;
       if (response.ok && recordId && recordId.startsWith('rec')) {
         window.location.href = `result.html?id=${recordId}`;
       } else {
-        alert('❌ 予期しないレスポンスです:\n' + JSON.stringify(resultJson));
+        alert('❌ 予期しないレスポンスです:\n' + recordId);
       }
 
     } catch (error) {

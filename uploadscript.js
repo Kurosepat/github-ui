@@ -44,7 +44,11 @@ window.addEventListener('DOMContentLoaded', function () {
       const response = await fetch('https://relay-server-v10.onrender.com/api/upload', {
         method: 'POST',
         body: formData
-      });
+        headers: {
+    // 追加：CORS対策の明示的な対話用ヘッダー
+    'Accept': 'application/json'
+      }
+    });
 
       const resultText = await response.text();
       clearInterval(interval);

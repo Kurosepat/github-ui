@@ -40,24 +40,22 @@ window.addEventListener('DOMContentLoaded', function () {
     formData.append('date', date);
 
     try {
-      // 👇 ここを Make Webhook から Relay Server に変更！
       const response = await fetch('https://relay-server-v10.onrender.com/api/upload', {
         method: 'POST',
         body: formData,
         headers: {
-    // 追加：CORS対策の明示的な対話用ヘッダー
-    'Accept': 'application/json'
-      }
-    });
+          'Accept': 'application/json'
+        }
+      });
 
-      const resultText = await response.text();
+      const resultJson = await response.json();
       clearInterval(interval);
 
-      const recordId = resultText.trim();
-      if (response.ok && recordId.startsWith('rec')) {
+      const recordId = resultJson.recordId;
+      if (response.ok && recordId && recordId.startsWith('rec')) {
         window.location.href = `result.html?id=${recordId}`;
       } else {
-        alert('❌ 予期しないレスポンスです:\n' + resultText);
+        alert('❌ 予期しないレスポンスです:\n' + JSON.stringify(resultJson));
       }
 
     } catch (error) {

@@ -40,7 +40,7 @@ window.addEventListener('DOMContentLoaded', function () {
     formData.append('date', date);
 
     try {
-      const response = await fetch('https://patent-ai-relay-server-v10.onrender.com/api/upload', {
+      const response = await fetch('https://relay-server-v10.onrender.com/api/upload', {
         method: 'POST',
         body: formData,
         headers: {

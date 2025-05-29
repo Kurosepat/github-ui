@@ -57,6 +57,8 @@
     const params = new URLSearchParams(window.location.search);
     const recordId = params.get("recordId");
 
+    console.log("取得した recordId:", recordId);
+
     if (!recordId) {
       document.getElementById("loading").innerText = "❌ レコードIDが指定されていません。";
     } else {
@@ -64,9 +66,15 @@
         .then(res => res.text())
         .then(text => {
           document.getElementById("loading").style.display = "none";
+
+          if (text === "結果が存在しません") {
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("loading").innerText = "⚠️ 結果がまだ登録されていません。時間をおいて再試行してください。";
+            return;
+          }
+
           document.getElementById("final-result").style.display = "block";
 
-          // 結果を「重要度:」ごとに分割して空行を入れる
           const formatted = text
             .split(/(?=重要度:)/g)
             .map(block => block.trim())

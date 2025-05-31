@@ -39,29 +39,30 @@ window.addEventListener('DOMContentLoaded', function () {
     if (zumenFile) formData.append('zumen', zumenFile);
     formData.append('date', date);
 
-    try {
-      const response = await fetch('https://relay-server-v6.onrender.com/api/upload', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'text/plain'
-        }
-      });
-
-      const recordId = await response.text();
-      clearInterval(interval);
-
-      if (response.ok && recordId && recordId.startsWith('rec')) {
-        window.location.href = `result.html?id=${recordId}`;
-      } else {
-        alert('❌ 予期しないレスポンスです:\n' + recordId);
-      }
-
-    } catch (error) {
-      clearInterval(interval);
-      console.error('通信エラー:', error);
-      alert('⚠️ ネットワークエラーが発生しました。再度お試しください。');
+try {
+  const response = await fetch('https://relay-server-v6.onrender.com/api/upload', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Accept': 'application/json'
     }
+  });
+
+  const result = await response.json();
+  const recordId = result.body;
+  clearInterval(interval);
+
+  if (response.ok && recordId && recordId.startsWith('rec')) {
+    window.location.href = `result.html?id=${recordId}`;
+  } else {
+    alert('❌ 予期しないレスポンスです:\n' + JSON.stringify(result));
+  }
+} catch (error) {
+  clearInterval(interval);
+  console.error('通信エラー:', error);
+  alert('⚠️ ネットワークエラーが発生しました。再度お試しください。');
+}
+
   });
 });
 

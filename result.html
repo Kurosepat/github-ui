@@ -54,8 +54,16 @@
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const recordId = params.get("recordId");
+    // Renderでは result.html?recordId=... が使えない場合があるため、強制的に #recordId にリダイレクト
+    const currentURL = new URL(window.location.href);
+    const recordIdFromQuery = currentURL.searchParams.get("recordId");
+
+    if (recordIdFromQuery && !window.location.hash) {
+      window.location.href = "/result.html#" + recordIdFromQuery;
+    }
+
+    // hash から recordId を取得
+    const recordId = window.location.hash.slice(1);
 
     console.log("取得した recordId:", recordId);
 

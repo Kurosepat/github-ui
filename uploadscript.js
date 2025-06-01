@@ -58,7 +58,7 @@ window.addEventListener('DOMContentLoaded', function () {
       }
 
       if (response.ok && recordId && recordId.startsWith('rec')) {
-        window.location.href = `result.html?recordId=${encodeURIComponent(recordId)}`;
+        window.location.href = `result.html#${encodeURIComponent(recordId)}`;
       } else {
         alert('❌ 予期しないレスポンスです:\n' + resultText);
       }

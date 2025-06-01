@@ -54,56 +54,48 @@
   </div>
 
   <script>
-  const recordId = window.location.hash.slice(1);
-  if (!recordId) {
-    document.getElementById("loading").innerText = "❌ レコードIDが指定されていません。";
-  } else {
-    fetch(`https://relay-server-v6.onrender.com/api/get-result?id=${recordId}`)
-      .then(res => res.text()) // ← ココが重要！
-      .then(text => {
-        document.getElementById("loading").style.display = "none";
+    // Renderでは result.html?recordId=... が使えない場合があるため、強制的に #recordId にリダイレクト
+    const currentURL = new URL(window.location.href);
+    const recordIdFromQuery = currentURL.searchParams.get("recordId");
 
-        let data;
-        try {
-          data = JSON.parse(text); // ← JSON文字列をオブジェクトに変換
-        } catch (e) {
-          console.error("JSONパース失敗:", e);
-          document.getElementById("result-text").innerText = "⚠️ 結果データが正しく読み込めませんでした。";
-          return;
-        }
+    if (recordIdFromQuery && !window.location.hash) {
+      window.location.href = "/result.html#" + recordIdFromQuery;
+    }
 
-        const result = data.result;
-        if (!result || !result.Check_result) {
-          document.getElementById("result-text").innerText = "⚠️ 結果が存在しません。";
-          return;
-        }
+    // hash から recordId を取得
+    const recordId = window.location.hash.slice(1);
 
-        const checks = typeof result.Check_result === "string"
-          ? JSON.parse(result.Check_result)
-          : result.Check_result;
+    console.log("取得した recordId:", recordId);
 
-        const formattedChecks = checks.map(entry => {
-          return `【重要度】\n${entry.重要度}\n` +
-                 `【項目分類】\n${entry.項目分類}\n` +
-                 `【該当箇所】\n${entry.該当箇所}\n` +
-                 `【問題点の説明】\n${entry.問題点の説明}\n` +
-                 `【修正提案】\n${entry.修正提案}`;
-        }).join("\n\n");
+    if (!recordId) {
+      document.getElementById("loading").innerText = "❌ レコードIDが指定されていません。";
+    } else {
+      fetch(`https://relay-server-v6.onrender.com/api/get-result?id=${recordId}`)
+        .then(res => res.text())
+        .then(text => {
+          document.getElementById("loading").style.display = "none";
 
-        const footer =
-          `【所員IDまたは氏名】\n${result["所員IDまたは氏名"] || "未記入"}\n` +
-          `【日付】\n${result["日付"] || "未記入"}\n` +
-          `【整理番号】\n${result["整理番号"] || "未記入"}`;
+          if (text === "結果が存在しません") {
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("loading").innerText = "⚠️ 結果がまだ登録されていません。時間をおいて再試行してください。";
+            return;
+          }
 
-        document.getElementById("final-result").style.display = "block";
-        document.getElementById("result-text").innerText = `${formattedChecks}\n\n${footer}`;
-      })
-      .catch(err => {
-        console.error("通信エラー:", err);
-        document.getElementById("loading").innerText = "⚠️ エラーが発生しました。時間をおいて再度お試しください。";
-      });
-  }
-</script>
+          document.getElementById("final-result").style.display = "block";
 
+          const formatted = text
+            .split(/(?=重要度:)/g)
+            .map(block => block.trim())
+            .filter(Boolean)
+            .join("\n\n");
+
+          document.getElementById("result-text").innerText = formatted;
+        })
+        .catch(err => {
+          console.error("通信エラー:", err);
+          document.getElementById("loading").innerText = "⚠️ エラーが発生しました。時間をおいて再度お試しください。";
+        });
+    }
+  </script>
 </body>
 </html>

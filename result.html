@@ -48,48 +48,50 @@
   <div id="result-box">
     <div id="loading">AI分析結果を読み込んでいます<span class="dots"></span></div>
     <div id="final-result" style="display: none;">
-      <strong>✅ チェック完了：</strong><br><br>
       <span id="result-text"></span>
     </div>
   </div>
-
   <script>
     // Renderでは result.html?recordId=... が使えない場合があるため、強制的に #recordId にリダイレクト
     const currentURL = new URL(window.location.href);
     const recordIdFromQuery = currentURL.searchParams.get("recordId");
-
     if (recordIdFromQuery && !window.location.hash) {
       window.location.href = "/result.html#" + recordIdFromQuery;
     }
 
-    // hash から recordId を取得
     const recordId = window.location.hash.slice(1);
-
-    console.log("取得した recordId:", recordId);
-
     if (!recordId) {
       document.getElementById("loading").innerText = "❌ レコードIDが指定されていません。";
     } else {
       fetch(`https://relay-server-v6.onrender.com/api/get-result?id=${recordId}`)
-        .then(res => res.text())
-        .then(text => {
+        .then(res => res.json())
+        .then(data => {
           document.getElementById("loading").style.display = "none";
 
-          if (text === "結果が存在しません") {
-            document.getElementById("loading").style.display = "block";
-            document.getElementById("loading").innerText = "⚠️ 結果がまだ登録されていません。時間をおいて再試行してください。";
+          const result = data.result;
+          if (!result || !result.Check_result) {
+            document.getElementById("final-result").style.display = "block";
+            document.getElementById("result-text").innerText = "⚠️ 結果が存在しません。";
             return;
           }
 
+          // チェック結果をフォーマット
+          const formattedChecks = result.Check_result.map(entry => {
+            return `【重要度】\n${entry.重要度}\n` +
+                   `【項目分類】\n${entry.項目分類}\n` +
+                   `【該当箇所】\n${entry.該当箇所}\n` +
+                   `【問題点の説明】\n${entry.問題点の説明}\n` +
+                   `【修正提案】\n${entry.修正提案}`;
+          }).join("\n\n");
+
+          // フッター情報を整形
+          const footer =
+            `【所員IDまたは氏名】\n${result["所員IDまたは氏名"] || "未記入"}\n` +
+            `【日付】\n${result["日付"] || "未記入"}\n` +
+            `【整理番号】\n${result["整理番号"] || "未記入"}`;
+
           document.getElementById("final-result").style.display = "block";
-
-          const formatted = text
-            .split(/(?=重要度:)/g)
-            .map(block => block.trim())
-            .filter(Boolean)
-            .join("\n\n");
-
-          document.getElementById("result-text").innerText = formatted;
+          document.getElementById("result-text").innerText = `${formattedChecks}\n\n${footer}`;
         })
         .catch(err => {
           console.error("通信エラー:", err);

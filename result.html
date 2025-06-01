@@ -54,46 +54,57 @@
   </div>
 
   <script>
-    // Renderでは result.html?recordId=... が使えない場合があるため、強制的に #recordId にリダイレクト
     const currentURL = new URL(window.location.href);
     const recordIdFromQuery = currentURL.searchParams.get("recordId");
-
     if (recordIdFromQuery && !window.location.hash) {
       window.location.href = "/result.html#" + recordIdFromQuery;
     }
 
-    // hash から recordId を取得
     const recordId = window.location.hash.slice(1);
-
-    console.log("取得した recordId:", recordId);
+    const loading = document.getElementById("loading");
+    const resultText = document.getElementById("result-text");
 
     if (!recordId) {
-      document.getElementById("loading").innerText = "❌ レコードIDが指定されていません。";
+      loading.innerText = "❌ レコードIDが指定されていません。";
     } else {
       fetch(`https://relay-server-v6.onrender.com/api/get-result?id=${recordId}`)
-        .then(res => res.text())
-        .then(text => {
-          document.getElementById("loading").style.display = "none";
+        .then(res => res.json())
+        .then(data => {
+          loading.style.display = "none";
 
-          if (text === "結果が存在しません") {
-            document.getElementById("loading").style.display = "block";
-            document.getElementById("loading").innerText = "⚠️ 結果がまだ登録されていません。時間をおいて再試行してください。";
+          const raw = data.result?.result;
+          const json = typeof raw === "string" ? JSON.parse(raw) : raw;
+
+          if (!json) {
+            loading.style.display = "block";
+            loading.innerText = "⚠️ 結果が存在しません。";
             return;
           }
 
+          const results = Array.isArray(json) ? json : [json];
+          let output = "";
+
+          for (const r of results) {
+            if (r["重要度"]) output += `【重要度】\n${r["重要度"]}\n`;
+            if (r["項目分類"]) output += `【項目分類】\n${r["項目分類"]}\n`;
+            if (r["該当箇所"]) output += `【該当箇所】\n${r["該当箇所"]}\n`;
+            if (r["問題点の説明"]) output += `【問題点の説明】\n${r["問題点の説明"]}\n`;
+            if (r["修正提案"]) output += `【修正提案】\n${r["修正提案"]}\n`;
+            output += "\n";
+          }
+
+          // 共通の末尾情報（1件目から取得）
+          const last = results[0];
+          if (last["所員IDまたは氏名"]) output += `【所員IDまたは氏名】\n${last["所員IDまたは氏名"]}\n`;
+          if (last["日付"]) output += `【日付】\n${last["日付"]}\n`;
+          if (last["整理番号"]) output += `【整理番号】\n${last["整理番号"]}\n`;
+
           document.getElementById("final-result").style.display = "block";
-
-          const formatted = text
-            .split(/(?=重要度:)/g)
-            .map(block => block.trim())
-            .filter(Boolean)
-            .join("\n\n");
-
-          document.getElementById("result-text").innerText = formatted;
+          resultText.textContent = output.trim();
         })
         .catch(err => {
           console.error("通信エラー:", err);
-          document.getElementById("loading").innerText = "⚠️ エラーが発生しました。時間をおいて再度お試しください。";
+          loading.innerText = "⚠️ エラーが発生しました。時間をおいて再度お試しください。";
         });
     }
   </script>

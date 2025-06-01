@@ -43,24 +43,24 @@ window.addEventListener('DOMContentLoaded', function () {
       const response = await fetch('https://relay-server-v6.onrender.com/api/upload', {
         method: 'POST',
         body: formData
-        // 👇 headers は指定しない（FormDataに任せる）
+        // headersは指定しない（FormDataが自動でやってくれる）
       });
 
-      const resultText = await response.text();
       clearInterval(interval);
 
-      let recordId = '';
-      try {
-        const json = JSON.parse(resultText);
-        recordId = json.body || json.recordId;
-      } catch {
-        recordId = resultText.trim();
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert('❌ アップロード失敗:\n' + errorText);
+        return;
       }
 
-      if (response.ok && recordId && recordId.startsWith('rec')) {
+      const result = await response.json();
+      const recordId = result.recordId;
+
+      if (recordId && recordId.startsWith('rec')) {
         window.location.href = `result.html#${encodeURIComponent(recordId)}`;
       } else {
-        alert('❌ 予期しないレスポンスです:\n' + resultText);
+        alert('❌ レスポンスに recordId が含まれていません:\n' + JSON.stringify(result));
       }
 
     } catch (error) {
